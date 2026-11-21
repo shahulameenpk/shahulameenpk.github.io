@@ -60,6 +60,29 @@ li{margin:4px 0}
 .edu b{display:block}
 .sub{font-size:15px;font-weight:700;margin:16px 0 0;color:var(--text)}
 .note{color:var(--muted);font-style:italic;font-size:14px}
+.dl-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:640px){.dl-grid{grid-template-columns:1fr}}
+.dl-btn{display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;
+  background:var(--brand-soft);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font:inherit}
+.dl-btn:hover{border-color:var(--brand)}
+.dl-btn .ic{font-size:22px}
+.dl-btn b{display:block;color:var(--brand)}
+.dl-btn small{color:var(--muted)}
+.lock{font-size:13px;color:var(--muted);margin:12px 0 0}
+dialog{border:1px solid var(--line);border-radius:14px;padding:24px;max-width:360px;width:calc(100% - 32px);
+  background:var(--card);color:var(--text)}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+dialog h3{margin:0 0 6px;font-size:18px}
+dialog p{margin:0 0 14px;color:var(--muted);font-size:14px}
+dialog input{width:100%;padding:10px 12px;font:inherit;border:1px solid var(--line);border-radius:8px;
+  background:var(--bg);color:var(--text)}
+.dlg-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+.dlg-actions button{font:inherit;font-weight:600;padding:8px 16px;border-radius:8px;cursor:pointer;
+  border:1px solid var(--brand);background:transparent;color:var(--brand)}
+.dlg-actions button.primary{background:var(--brand);color:#fff}
+@media (prefers-color-scheme: dark){.dlg-actions button.primary{color:#0f141c}}
+.msg{min-height:20px;font-size:14px;margin-top:8px}
+.msg.err{color:var(--accent)}
 footer{text-align:center;color:var(--muted);font-size:13px;margin-top:28px}
 @media print{body{background:#fff}.btns{display:none}section,header.hero{border:none;padding:8px 0}}
 </style>
@@ -200,7 +223,78 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:28px}
   <ul class="chips"><li>English</li><li>Malayalam</li><li>Hindi</li><li>Arabic</li></ul>
 </section>
 
+<section id="download">
+  <h2>Download CV</h2>
+  <div class="dl-grid">
+    <button class="dl-btn" type="button" data-file="files/cv.enc" data-name="Shahul-Ameen-PK-CV.pdf" data-label="Download CV (PDF)">
+      <span class="ic">📄</span><span><b>Download CV (PDF)</b><small>Standard CV</small></span>
+    </button>
+    <button class="dl-btn" type="button" data-file="files/cv-personal.enc" data-name="Shahul-Ameen-PK-CV-Personal-Details.pdf" data-label="Download CV (PDF) with Personal details">
+      <span class="ic">📇</span><span><b>Download CV (PDF) with Personal details</b><small>Includes phone numbers</small></span>
+    </button>
+  </div>
+  <p class="lock">🔒 Password protected. Please contact me for the password.</p>
+</section>
+
+<dialog id="pwDialog">
+  <form id="pwForm" method="dialog">
+    <h3 id="pwTitle">Download CV</h3>
+    <p>Enter the password to download this file.</p>
+    <input id="pwInput" type="password" inputmode="numeric" autocomplete="off" placeholder="Password" required>
+    <div id="pwMsg" class="msg" role="status"></div>
+    <div class="dlg-actions">
+      <button type="button" id="pwCancel">Cancel</button>
+      <button type="submit" class="primary" id="pwGo">Download</button>
+    </div>
+  </form>
+</dialog>
+
 <footer>© 2026 Shahul Ameen PK</footer>
 </div>
+<script>
+(function(){
+  var ITER = 600000;
+  var dlg = document.getElementById('pwDialog'), form = document.getElementById('pwForm'),
+      input = document.getElementById('pwInput'), msg = document.getElementById('pwMsg'),
+      title = document.getElementById('pwTitle'), go = document.getElementById('pwGo');
+  var current = null;
+
+  document.querySelectorAll('.dl-btn').forEach(function(b){
+    b.addEventListener('click', function(){
+      current = b.dataset; title.textContent = b.dataset.label;
+      input.value = ''; msg.textContent = ''; msg.className = 'msg';
+      if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open','');
+      input.focus();
+    });
+  });
+  document.getElementById('pwCancel').addEventListener('click', function(){ dlg.close(); });
+
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    if (!current) return;
+    if (!window.crypto || !crypto.subtle) { showErr('Your browser does not support secure downloads. Please try another browser.'); return; }
+    go.disabled = true; msg.className = 'msg'; msg.textContent = 'Checking…';
+    try {
+      var res = await fetch(current.file, {cache:'no-store'});
+      if (!res.ok) throw new Error('missing');
+      var buf = new Uint8Array(await res.arrayBuffer());
+      var salt = buf.slice(3,19), iv = buf.slice(19,31), data = buf.slice(31);
+      var base = await crypto.subtle.importKey('raw', new TextEncoder().encode(input.value.trim()), 'PBKDF2', false, ['deriveKey']);
+      var key = await crypto.subtle.deriveKey({name:'PBKDF2', salt:salt, iterations:ITER, hash:'SHA-256'}, base, {name:'AES-GCM', length:256}, false, ['decrypt']);
+      var pdf;
+      try { pdf = await crypto.subtle.decrypt({name:'AES-GCM', iv:iv}, key, data); }
+      catch(_) { showErr('Incorrect password. Please try again.'); input.select(); return; }
+      var url = URL.createObjectURL(new Blob([pdf], {type:'application/pdf'}));
+      var a = document.createElement('a'); a.href = url; a.download = current.name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 10000);
+      dlg.close();
+    } catch(err) {
+      showErr('Download failed. Please check your connection and try again.');
+    } finally { go.disabled = false; }
+  });
+  function showErr(t){ msg.className = 'msg err'; msg.textContent = t; }
+})();
+</script>
 </body>
 </html>
