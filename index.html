@@ -109,7 +109,8 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:28px}
       <li>✉️ <a href="mailto:shahulameenpk@gmail.com">shahulameenpk@gmail.com</a></li>
     </ul>
     <div class="btns">
-      <a class="btn primary" href="https://www.linkedin.com/in/shahulameenpk/" target="_blank" rel="noopener">LinkedIn</a>
+      <a class="btn primary" href="mailto:shahulameenpk@gmail.com?subject=Job%20opportunity%20for%20Shahul%20Ameen%20PK&amp;body=Hi%20Shahul%2C%0A%0AI%20came%20across%20your%20resume%20website%20and%20would%20like%20to%20discuss%20an%20opportunity%20with%20you.%0A%0ARole%3A%20%0ACompany%3A%20%0ABest%20time%20to%20talk%3A%20%0A%0ARegards%2C%0A">✉ Contact me</a>
+      <a class="btn" href="https://www.linkedin.com/in/shahulameenpk/" target="_blank" rel="noopener">LinkedIn</a>
     </div>
   </div>
 </header>
@@ -197,6 +198,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:28px}
       <button class="dl-btn" type="button" data-file="files/report-meat.enc" data-name="Formulation-Insights-Meat-Products-Shahul-Ameen-PK.pdf" data-label="Download report: Formulation Insights – Meat">
         <span class="ic">🔒</span><span><b>Download report (PDF)</b><small>Password protected</small></span>
       </button>
+      <p class="lock"><a class="req-pw" href="#" data-label="Report: Formulation Insights – Meat and Meat Related Products">Request password</a></p>
     </div>
   </article>
 </section>
@@ -264,13 +266,13 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:28px}
       <span class="ic">📇</span><span><b>Download CV (PDF) with Personal details</b><small>Includes phone numbers</small></span>
     </button>
   </div>
-  <p class="lock">🔒 Password protected. Please contact me for the password.</p>
+  <p class="lock">🔒 Password protected. <a class="req-pw" href="#" data-label="My CV">Request password</a></p>
 </section>
 
 <dialog id="pwDialog">
   <form id="pwForm" method="dialog">
     <h3 id="pwTitle">Download CV</h3>
-    <p>Enter the password to download this file. Contact me if you need the password.</p>
+    <p>Enter the password to download this file. Don't have it? <a id="pwRequest" class="req-pw" href="#">Request password</a></p>
     <input id="pwInput" type="password" inputmode="numeric" autocomplete="off" placeholder="Password" required>
     <div id="pwMsg" class="msg" role="status"></div>
     <div class="dlg-actions">
@@ -289,6 +291,20 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:28px}
       input = document.getElementById('pwInput'), msg = document.getElementById('pwMsg'),
       title = document.getElementById('pwTitle'), go = document.getElementById('pwGo');
   var current = null;
+  var EMAIL = 'shahulameenpk@gmail.com';
+
+  function requestMail(label){
+    var subject = 'Password request: ' + label;
+    var body = 'Hi Shahul,\n\nI viewed your resume website and would like the password to download:\n' + label +
+               '\n\nName: \nCompany: \nRole / purpose: \n\nThank you,\n';
+    return 'mailto:' + EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  }
+  document.addEventListener('click', function(e){
+    var a = e.target.closest && e.target.closest('a.req-pw');
+    if (!a) return;
+    var label = a.id === 'pwRequest' ? (current ? current.label.replace(/^Download\s*/i,'') : 'Your files') : a.dataset.label;
+    a.href = requestMail(label);
+  });
 
   document.querySelectorAll('.dl-btn').forEach(function(b){
     b.addEventListener('click', function(){
