@@ -83,6 +83,15 @@ dialog input{width:100%;padding:10px 12px;font:inherit;border:1px solid var(--li
 @media (prefers-color-scheme: dark){.dlg-actions button.primary{color:#0f141c}}
 .msg{min-height:20px;font-size:14px;margin-top:8px}
 .msg.err{color:var(--accent)}
+.proj{display:grid;grid-template-columns:260px 1fr;gap:20px;border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--bg)}
+@media (max-width:700px){.proj{grid-template-columns:1fr}}
+.proj img{width:100%;border-radius:8px;display:block;aspect-ratio:16/9;object-fit:cover}
+.proj h3{margin:0 0 4px;font-size:17px}
+.proj .meta{color:var(--muted);font-size:14px;margin:0 0 10px}
+.proj ul{margin:8px 0 12px}
+.proj .chips{margin-bottom:14px}
+.proj .chips li{font-size:13px;padding:3px 10px}
+.proj .dl-btn{width:auto;display:inline-flex;padding:10px 14px}
 footer{text-align:center;color:var(--muted);font-size:13px;margin-top:28px}
 @media print{body{background:#fff}.btns{display:none}section,header.hero{border:none;padding:8px 0}}
 </style>
@@ -170,6 +179,28 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:28px}
   </div>
 </section>
 
+<section id="projects">
+  <h2>Projects</h2>
+  <article class="proj">
+    <img src="img/report-meat-cover.jpg" alt="Cover of the report Formulation Insights: Meat and Meat Related Products" loading="lazy">
+    <div>
+      <h3>Formulation Insights – Meat and Meat Related Products</h3>
+      <p class="meta">NPD – Formulation · Patent-based technical report · 9 pages · March 2024</p>
+      <p style="margin:0">Technical notes that turn patent literature into practical formulation guidance for meat product development, comparing existing and innovative formulations.</p>
+      <ul>
+        <li><b>Colour enhancement &amp; stabilization in fresh meat:</b> how adding sodium bicarbonate to post-rigor meat improves colour, stability and shelf life compared with untreated meat.</li>
+        <li><b>Reducing moisture loss in cooked meats:</b> a particulate seasoning with small amounts of semolina and flour that cuts cooking loss and improves juiciness of steaks and larger cuts.</li>
+      </ul>
+      <ul class="chips">
+        <li>Patent analysis</li><li>Meat science</li><li>NPD formulation</li><li>Shelf life</li><li>Technical writing</li>
+      </ul>
+      <button class="dl-btn" type="button" data-file="files/report-meat.enc" data-name="Formulation-Insights-Meat-Products-Shahul-Ameen-PK.pdf" data-label="Download report: Formulation Insights – Meat">
+        <span class="ic">🔒</span><span><b>Download report (PDF)</b><small>Password protected</small></span>
+      </button>
+    </div>
+  </article>
+</section>
+
 <section>
   <h2>Education</h2>
   <div class="edu"><div><b>MSc Food Science &amp; Technology</b>Pondicherry Central University – India</div><span class="date">2020</span></div>
@@ -239,7 +270,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:28px}
 <dialog id="pwDialog">
   <form id="pwForm" method="dialog">
     <h3 id="pwTitle">Download CV</h3>
-    <p>Enter the password to download this file.</p>
+    <p>Enter the password to download this file. Contact me if you need the password.</p>
     <input id="pwInput" type="password" inputmode="numeric" autocomplete="off" placeholder="Password" required>
     <div id="pwMsg" class="msg" role="status"></div>
     <div class="dlg-actions">
