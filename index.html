@@ -92,6 +92,12 @@ dialog input{width:100%;padding:10px 12px;font:inherit;border:1px solid var(--li
 .proj .chips{margin-bottom:14px}
 .proj .chips li{font-size:13px;padding:3px 10px}
 .proj .dl-btn{width:auto;display:inline-flex;padding:10px 14px}
+.proj.video{grid-template-columns:1fr}
+.vwrap{position:relative;border-radius:8px;overflow:hidden;background:#000;aspect-ratio:1280/620}
+.vwrap img,.vwrap video{width:100%;height:100%;display:block;object-fit:contain;aspect-ratio:auto;border-radius:0}
+.vwrap .play{position:absolute;inset:0;display:grid;place-items:center;border:0;cursor:pointer;
+  background:linear-gradient(rgba(0,0,0,.15),rgba(0,0,0,.45));color:#fff;font:inherit}
+.vwrap .play span{background:rgba(11,61,122,.92);border-radius:999px;padding:12px 20px;font-weight:600;font-size:16px}
 footer{text-align:center;color:var(--muted);font-size:13px;margin-top:28px}
 @media print{body{background:#fff}.btns{display:none}section,header.hero{border:none;padding:8px 0}}
 </style>
@@ -243,6 +249,31 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:28px}
       <p class="lock"><a class="req-pw" href="#" data-label="Report: Hedonic + JAR Consumer Optimisation Report">Request password</a></p>
     </div>
   </article>
+
+  <article class="proj video" style="margin-top:16px">
+    <div class="vwrap" id="kitchenVideo">
+      <img src="img/kitchen-layout-poster.jpg" alt="3D render of the main cooking area in the new central kitchen layout" loading="lazy">
+      <button class="play dl-btn-like" type="button" data-file="files/video-kitchen-layout.enc" data-mode="play" data-target="kitchenVideo" data-type="video/mp4" data-label="Play video: Central Kitchen Layout – 3D Walkthrough">
+        <span>🔒 ▶ Play video</span>
+      </button>
+    </div>
+    <div>
+      <h3>Central Kitchen Layout – 3D Walkthrough</h3>
+      <p class="meta">Video · 3D rendered walkthrough · 4 min 20 s · Kitchen design &amp; food safety</p>
+      <p style="margin:0">New central kitchen layout design and workflow (ISO/TS 22002-2:2013(E) / GSO 2309-2013 / GSO 21/1984 / Saudi Aramco / MoMAH).</p>
+      <ul>
+        <li>A guided 24-stop tour that <b>follows the product from receiving to dispatch</b>: ingredients receiving, dry storage, chicken preparation, sauce room, bakery, main cooking, pot wash, finished product storage and dispatch.</li>
+        <li>Shows <b>one-way hygienic flow</b>, dedicated preparation rooms, temperature-controlled areas, hand-wash points, PPE stations and air curtains at entries.</li>
+      </ul>
+      <ul class="chips">
+        <li>Kitchen layout design</li><li>Hygienic zoning</li><li>ISO/TS 22002-2</li><li>GSO / MoMAH</li><li>Workflow planning</li>
+      </ul>
+      <button class="dl-btn" type="button" data-file="files/video-kitchen-layout.enc" data-mode="play" data-target="kitchenVideo" data-type="video/mp4" data-label="Play video: Central Kitchen Layout – 3D Walkthrough">
+        <span class="ic">🔒</span><span><b>Play video</b><small>Password protected</small></span>
+      </button>
+      <p class="lock"><a class="req-pw" href="#" data-label="Video: Central Kitchen Layout – 3D Walkthrough">Request password</a></p>
+    </div>
+  </article>
 </section>
 
 <section>
@@ -348,7 +379,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:28px}
     a.href = requestMail(label);
   });
 
-  document.querySelectorAll('.dl-btn').forEach(function(b){
+  document.querySelectorAll('.dl-btn, .dl-btn-like').forEach(function(b){
     b.addEventListener('click', function(){
       current = b.dataset; title.textContent = b.dataset.label;
       input.value = ''; msg.textContent = ''; msg.className = 'msg';
@@ -373,6 +404,17 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:28px}
       var pdf;
       try { pdf = await crypto.subtle.decrypt({name:'AES-GCM', iv:iv}, key, data); }
       catch(_) { showErr('Incorrect password. Please try again.'); input.select(); return; }
+      if (current.mode === 'play') {
+        var wrap = document.getElementById(current.target);
+        var vurl = URL.createObjectURL(new Blob([pdf], {type: current.type || 'video/mp4'}));
+        var v = document.createElement('video');
+        v.src = vurl; v.controls = true; v.playsInline = true; v.preload = 'auto';
+        wrap.innerHTML = ''; wrap.appendChild(v);
+        document.querySelectorAll('[data-target="' + current.target + '"]').forEach(function(x){ if (x.closest('.vwrap') === null) x.style.display = 'none'; });
+        dlg.close(); wrap.scrollIntoView({behavior:'smooth', block:'center'});
+        v.play().catch(function(){});
+        return;
+      }
       var url = URL.createObjectURL(new Blob([pdf], {type:'application/pdf'}));
       var a = document.createElement('a'); a.href = url; a.download = current.name;
       document.body.appendChild(a); a.click(); a.remove();
